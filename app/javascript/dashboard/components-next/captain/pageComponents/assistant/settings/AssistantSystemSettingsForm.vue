@@ -5,6 +5,7 @@ import { useVuelidate } from '@vuelidate/core';
 import { maxValue, minLength, minValue, required } from '@vuelidate/validators';
 import { FEATURE_FLAGS } from 'dashboard/featureFlags';
 import { useAccount } from 'dashboard/composables/useAccount';
+import { formatDelay } from 'dashboard/helper/automationHelper';
 
 import Banner from 'dashboard/components-next/banner/Banner.vue';
 import Button from 'dashboard/components-next/button/Button.vue';
@@ -82,6 +83,28 @@ const initialActionTimingLabel = computed(() =>
     ? t('CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.REVIEW_AFTER')
     : t('CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.RESOLVE_AFTER')
 );
+const conflictingPendingFollowUps = computed(() => {
+  if (!shouldShowInactivityDuration.value) return [];
+
+  return (props.assistant.pending_follow_up_automations || []).filter(
+    automation => state.inactivityThresholdMinutes <= automation.execution_delay
+  );
+});
+const timerConflictWarning = computed(() => {
+  const count = conflictingPendingFollowUps.value.length;
+  if (!count) return '';
+
+  const longestDelay = Math.max(
+    ...conflictingPendingFollowUps.value.map(
+      automation => automation.execution_delay
+    )
+  );
+  return t(
+    'CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.TIMER_CONFLICT_WARNING',
+    { count, delay: formatDelay(longestDelay) },
+    count
+  );
+});
 
 const validationRules = {
   handoffMessage: { minLength: minLength(1) },
@@ -230,6 +253,13 @@ watch(
             {{ formErrors.inactivityThresholdMinutes }}
           </p>
         </div>
+
+        <Banner v-if="timerConflictWarning" color="amber" class="mx-4">
+          <div class="flex items-start gap-2">
+            <span class="i-lucide-triangle-alert mt-0.5 size-4 shrink-0" />
+            {{ timerConflictWarning }}
+          </div>
+        </Banner>
 
         <Banner
           v-if="state.autoResolveMode === 'legacy'"

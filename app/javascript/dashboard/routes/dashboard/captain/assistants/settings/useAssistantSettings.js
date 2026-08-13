@@ -15,6 +15,9 @@ export function useAssistantSettings() {
     assistantId
   );
 
+  const fetchAssistant = () =>
+    store.dispatch('captainAssistants/show', assistantId.value);
+
   const updateAssistant = async updatedAssistant => {
     try {
       await store.dispatch('captainAssistants/update', {
@@ -27,5 +30,5 @@ export function useAssistantSettings() {
     }
   };
 
-  return { assistantId, assistant, updateAssistant };
+  return { assistantId, assistant, fetchAssistant, updateAssistant };
 }

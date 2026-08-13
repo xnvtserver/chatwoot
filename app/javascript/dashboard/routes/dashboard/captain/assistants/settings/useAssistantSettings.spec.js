@@ -35,6 +35,17 @@ describe('useAssistantSettings', () => {
     expect(record.value).toEqual(assistant);
   });
 
+  it('fetches the assistant details used by the settings page', async () => {
+    const { fetchAssistant } = useAssistantSettings();
+
+    await fetchAssistant();
+
+    expect(mockStore.dispatch).toHaveBeenCalledWith(
+      'captainAssistants/show',
+      7
+    );
+  });
+
   it('dispatches the update with the assistant id and alerts success', async () => {
     const { updateAssistant } = useAssistantSettings();
 

@@ -26,9 +26,9 @@ const assistant = {
   },
 };
 
-const mountComponent = () =>
+const mountComponent = (assistantProp = assistant) =>
   shallowMount(AssistantSystemSettingsForm, {
-    props: { assistant },
+    props: { assistant: assistantProp },
     global: { stubs: { Banner: false, SettingsToggleSection: false } },
   });
 
@@ -104,6 +104,34 @@ describe('AssistantSystemSettingsForm', () => {
     expect(wrapper.findAllComponents(Switch)).toHaveLength(1);
     expect(wrapper.text()).toContain(
       'CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.ALWAYS_WARNING'
+    );
+  });
+
+  it('warns while the Captain timer can run before a pending follow up', async () => {
+    const wrapper = mountComponent({
+      ...assistant,
+      pending_follow_up_automations: [
+        { id: 1, name: 'Short wait', execution_delay: 60 },
+        { id: 2, name: 'Long wait', execution_delay: 120 },
+      ],
+    });
+
+    expect(wrapper.text()).toContain(
+      'CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.TIMER_CONFLICT_WARNING'
+    );
+
+    wrapper.findComponent(DurationSelect).vm.$emit('update:modelValue', 120);
+    await nextTick();
+
+    expect(wrapper.text()).toContain(
+      'CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.TIMER_CONFLICT_WARNING'
+    );
+
+    wrapper.findComponent(DurationSelect).vm.$emit('update:modelValue', 125);
+    await nextTick();
+
+    expect(wrapper.text()).not.toContain(
+      'CAPTAIN.ASSISTANTS.FORM.INACTIVITY_RESOLUTION.TIMER_CONFLICT_WARNING'
     );
   });
 });

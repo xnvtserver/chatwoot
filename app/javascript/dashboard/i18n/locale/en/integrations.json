@@ -605,6 +605,7 @@
           "REVIEW_AFTER": "Review after",
           "RESOLVE_AFTER": "Resolve after",
           "ALWAYS_WARNING": "Captain will resolve every conversation after the selected time without reviewing it. Some conversations that still need help may be closed.",
+          "TIMER_CONFLICT_WARNING": "Captain may resolve or hand off the conversation before a delayed follow up runs. One matching automation waits for {delay}. Set this timer to more than {delay}, or shorten the automation wait. | Captain may resolve or hand off the conversation before a delayed follow up runs. {count} matching automations wait for up to {delay}. Set this timer to more than {delay}, or shorten the automation waits.",
           "PENDING_INFO": "The conversation remains pending until the customer replies.",
           "RESOLUTION_MESSAGE": {
             "TITLE": "Send a message when resolving",
